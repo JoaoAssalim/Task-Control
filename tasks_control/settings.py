@@ -70,6 +70,12 @@ TEMPLATES = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ]
+}
+
 WSGI_APPLICATION = 'tasks_control.wsgi.application'
 
 

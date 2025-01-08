@@ -5,3 +5,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = "__all__"
+        
+class TaskUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+    
