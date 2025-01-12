@@ -1,13 +1,15 @@
-import os 
-
-import pandas as pd
+import logging
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import viewsets, generics, parsers
 
 from core.tasks.models import Task
+from core.tasks.file_loader import handle_file
 from core.tasks.api.serializers import TaskSerializer, TaskUploadSerializer
+
+
+logger = logging.Logger("Tasks API")
 
 class TaskAPIView(viewsets.ModelViewSet):
     queryset = Task.objects.all()
@@ -28,6 +30,7 @@ class FileUploadTaskAPIView(generics.GenericAPIView):
         file = request.FILES.get("file", None)
         
         if not file:
+            logger.error("API requires a File.")
             return Response(
                 {
                     "message": "Invalid file.",
@@ -35,32 +38,4 @@ class FileUploadTaskAPIView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        extension = os.path.basename(file.name).split(".")[-1]
-            
-        if extension not in ["csv", "xlsx"]:
-            return Response(
-                {
-                    "message": "Invalid file extension.",
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-    
-        if extension == "csv":
-            df = pd.read_csv(file)
-        else:
-            df = pd.read_excel(file)
-        
-        bulk_tasks = [{"name": item.name, "status": item.status, "created_by": item.created_by} for item in df.itertuples()]
-        
-        serializer = TaskSerializer(data=bulk_tasks, many=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        
-        
-        return Response(
-            {
-                "message": "File was uploaded with success.",
-            },
-            status=status.HTTP_201_CREATED
-        )
+        return handle_file(file)
