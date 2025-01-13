@@ -1,7 +1,7 @@
 import os
 import logging
 
-from pandas import pd
+import pandas as pd
 
 from rest_framework import status
 from rest_framework.response import Response
